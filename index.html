@@ -1,233 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Channel Analysis Report: SolarBalls Hindi</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f7f6;
-        color: #333;
-        margin: 0;
-        padding: 20px;
-    }
-    .report-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    h1 {
-        text-align: center;
-        color: #2c3e50;
-        border-bottom: 2px solid #e74c3c;
-        padding-bottom: 10px;
-    }
-    .tabs {
-        display: flex;
-        flex-wrap: wrap;
-        margin-top: 20px;
-        border-bottom: 2px solid #ddd;
-    }
-    .tabs input[type="radio"] {
-        display: none;
-    }
-    .tabs label {
-        padding: 10px 15px;
-        background: #ecf0f1;
-        cursor: pointer;
-        border: 1px solid #ddd;
-        border-bottom: none;
-        margin-right: 2px;
-        border-radius: 5px 5px 0 0;
-        font-weight: bold;
-        color: #7f8c8d;
-    }
-    .tabs label:hover {
-        background: #bdc3c7;
-        color: #2c3e50;
-    }
-    .tabs input[type="radio"]:checked + label {
-        background: #e74c3c;
-        color: #fff;
-        border-color: #e74c3c;
-    }
-    .tab-content {
-        width: 100%;
-        padding: 20px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-top: none;
-        display: none;
-        box-sizing: border-box;
-        line-height: 1.6;
-    }
-    #tab1:checked ~ #content1,
-    #tab2:checked ~ #content2,
-    #tab3:checked ~ #content3,
-    #tab4:checked ~ #content4,
-    #tab5:checked ~ #content5,
-    #tab6:checked ~ #content6,
-    #tab7:checked ~ #content7,
-    #tab8:checked ~ #content8,
-    #tab9:checked ~ #content9 {
-        display: block;
-    }
-    h2 { color: #e74c3c; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 10px; }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 12px;
-        text-align: left;
-    }
-    th {
-        background-color: #f8f9fa;
-        color: #2c3e50;
-    }
-    .highlight-red { color: #c0392b; font-weight: bold; }
-    .highlight-green { color: #27ae60; font-weight: bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarBalls Hindi - Algorithmic Audit</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        
+        body { background-color: var(--bg-dark); color: var(--text-main); padding: 2rem; line-height: 1.6; }
+        
+        .header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .header h1 { color: var(--text-main); font-size: 2rem; letter-spacing: -0.5px; }
+        .header span { color: var(--accent-red); }
+
+        .dashboard-grid { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; }
+
+        /* Sidebar Navigation */
+        .sidebar { display: flex; flex-direction: column; gap: 0.5rem; }
+        .tab-btn {
+            background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 1rem; text-align: left; cursor: pointer; border-radius: 6px; font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover { background: #2a3b52; color: var(--text-main); }
+        .tab-btn.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+        /* Content Area */
+        .content-area { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; min-height: 600px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        h3 { color: var(--text-muted); margin: 1.5rem 0 1rem 0; }
+        
+        /* Charts Container */
+        .chart-container { position: relative; height: 350px; width: 100%; margin: 2rem 0; background: var(--bg-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+        
+        /* Accordions */
+        .accordion { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 1rem; overflow: hidden; }
+        .accordion-header { padding: 1rem 1.5rem; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center; background: #1a2436; }
+        .accordion-header:hover { background: #202c42; }
+        .accordion-content { padding: 0 1.5rem; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; color: var(--text-muted); }
+        .accordion.open .accordion-content { padding: 1.5rem; max-height: 500px; border-top: 1px solid var(--border); }
+        .accordion.open .accordion-header { color: var(--accent-red); }
+
+        /* KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .kpi-card { background: var(--bg-dark); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); border-left: 4px solid var(--accent-blue); }
+        .kpi-card.alert { border-left-color: var(--accent-red); }
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); margin-top: 0.5rem; }
+        .kpi-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .tag-red { color: var(--accent-red); font-weight: bold; }
+        .tag-green { color: var(--accent-green); font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; }
+        tr:hover { background: var(--bg-dark); }
+    </style>
 </head>
 <body>
 
-<div class="report-container">
-    <h1>SolarBalls Hindi (@solarballs_india) - 90 Day Performance & Growth Report</h1>
-
-    <div class="tabs">
-        <input type="radio" name="tabs" id="tab1" checked>
-        <label for="tab1">Situation Now - Long videos</label>
-
-        <input type="radio" name="tabs" id="tab2">
-        <label for="tab2">Situation now - Shorts</label>
-
-        <input type="radio" name="tabs" id="tab3">
-        <label for="tab3">Problems - Long video</label>
-
-        <input type="radio" name="tabs" id="tab4">
-        <label for="tab4">Problem - shorts</label>
-
-        <input type="radio" name="tabs" id="tab5">
-        <label for="tab5">Solutions - Long video</label>
-
-        <input type="radio" name="tabs" id="tab6">
-        <label for="tab6">Solutions - short video</label>
-
-        <input type="radio" name="tabs" id="tab7">
-        <label for="tab7">Overall solutions</label>
-
-        <input type="radio" name="tabs" id="tab8">
-        <label for="tab8">Top 10 Long videos</label>
-
-        <input type="radio" name="tabs" id="tab9">
-        <label for="tab9">Top 10 Shorts</label>
-
-        <div id="content1" class="tab-content">
-            <h2>Situation Now - Long Videos (Last 90 Days)</h2>
-            <p>The channel currently has <strong>875K+ subscribers</strong> with over <strong>159M total views</strong>. In the last 90 days, the channel is running a consistent weekly release schedule but experiencing severe viewer attrition on sequential episodic content.</p>
-            <ul>
-                <li><strong>Mar 14, 2026:</strong> Suraj Tak Ka Mission - Part 1 — <span class="highlight-green">~90.2K views</span></li>
-                <li><strong>Mar 21, 2026:</strong> Suraj Tak Ka Mission - Part 2 — <span class="highlight-red">~65.3K views</span> (27% drop)</li>
-                <li><strong>Mar 31, 2026:</strong> Suraj Tak Ka Mission - Part 3 — <span class="highlight-red">~54.7K views</span> (16% drop from Part 2)</li>
-                <li><strong>Apr 11, 2026:</strong> Our Planets Gone Rogue Part 2 — <span class="highlight-red">~45.3K views</span></li>
-            </ul>
-            <p>Recent long-form videos are only activating roughly 5% to 10% of the subscriber base.</p>
-        </div>
-
-        <div id="content2" class="tab-content">
-            <h2>Situation Now - Shorts (Last 90 Days)</h2>
-            <p>The channel has completely halted organic Shorts production. Over the last 90 days, there is zero new top-of-funnel traffic being driven by native YouTube Shorts. All circulating Shorts metrics are derived entirely from legacy uploads published over a year ago or unauthorized clips reposted by third-party channels.</p>
-        </div>
-
-        <div id="content3" class="tab-content">
-            <h2>Problems Found - Long Video</h2>
-            <ul>
-                <li><strong>The "Part 1/Part 2" Trap:</strong> The algorithm suppresses episodic "Part 2/3" videos because they have inherently lower click-through rates (CTR). Viewers who missed Part 1 will not click Part 2. This is causing a documented 40-50% view bleed from the start to the end of a series.</li>
-                <li><strong>Metadata Bloat:</strong> Titles are cluttered with dual-language phrasing (e.g., "Our Planets Gone Rogue Part 2 || Hindi || Humare Planets..."). This eats up valuable visual space on mobile devices and dilutes the core hook.</li>
-                <li><strong>Dead Subscriber Weight:</strong> 875K subs generating 50K views means the algorithm assumes the content is bad because the core audience is ignoring it. The channel needs to break out of its own subscriber pool to reach new viewers.</li>
-            </ul>
-        </div>
-
-        <div id="content4" class="tab-content">
-            <h2>Problems Found - Shorts</h2>
-            <ul>
-                <li><strong>Abandoned Discovery Funnel:</strong> Shorts are currently YouTube's most aggressive tool for reaching non-subscribers. By abandoning Shorts, the channel has severed its primary mechanism for audience acquisition.</li>
-                <li><strong>Inefficient Asset Utilization:</strong> High-retention, high-quality animation is already being rendered for long videos. Failing to cut these into 60-second vertical formats leaves guaranteed algorithmic impressions on the table.</li>
-            </ul>
-        </div>
-
-        <div id="content5" class="tab-content">
-            <h2>Solutions for Long Video Problems</h2>
-            <ul>
-                <li><strong>Eliminate Episodic Titles:</strong> If a story requires multiple parts, do not label them "Part 2" or "Part 3". Package every video as a standalone narrative with a unique, high-stakes hook. <em>(Instead of "Lost Earth Part 2", title it "Earth Ki Nayi Jagah Kahan Hai?").</em></li>
-                <li><strong>Ruthless Title Optimization:</strong> Drop the "|| Hindi ||" tags from the title. The thumbnail language and channel name already establish the language. Use the freed-up character space for emotional or high-stakes Hindi copywriting.</li>
-                <li><strong>Consolidate Runtimes:</strong> Combine 7-minute multi-part episodes into single, high-retention 15-20 minute features to maximize Average View Duration (AVD) and ad revenue.</li>
-            </ul>
-        </div>
-
-        <div id="content6" class="tab-content">
-            <h2>Solutions for Short Video Problems</h2>
-            <ul>
-                <li><strong>Clip Extraction Pipeline:</strong> Implement a mandatory rule: Every long-form video must yield 2-3 Shorts. Extract the most chaotic, visually striking 40-second moments.</li>
-                <li><strong>Cross-Linking:</strong> Use the "Related Video" feature in the YouTube Studio Shorts editor to hard-link every single Short directly to the full-length long-form video it was pulled from.</li>
-                <li><strong>Vertical Re-framing:</strong> Do not just crop the 16:9 video. Ensure the central subjects (the planets) are centered in the 9:16 frame and add dynamic, fast-paced captions specifically optimized for mobile scrolling.</li>
-            </ul>
-        </div>
-
-        <div id="content7" class="tab-content">
-            <h2>Overall Solutions to Grow the Channel</h2>
-            <ul>
-                <li><strong>Pivot to Standalone "What If" Concepts:</strong> The channel's historical data proves that hypothetical scenarios ("What if the Sun disappeared?", "Why is Venus hot?") vastly outperform character-driven lore arcs. Focus 80% of production on high-concept educational/hypothetical setups.</li>
-                <li><strong>Re-engage the Community Tab:</strong> Run polls, post lore questions, and drop high-res image teasers 48 hours prior to uploads to warm up the algorithmic cache for the 875K dormant subscribers.</li>
-                <li><strong>Thumbnail A/B Testing:</strong> Utilize YouTube's native Test & Compare feature. Run two thumbnail variants for every upload—one lore-focused, one completely exaggerated and high-contrast—to scientifically determine what drives higher CTR.</li>
-            </ul>
-        </div>
-
-        <div id="content8" class="tab-content">
-            <h2>Top 10 Good Performing Long Videos</h2>
-            <table>
-                <tr><th>Rank</th><th>Video Title</th><th>Approximate Views</th></tr>
-                <tr><td>1</td><td>Earth Sun की तरफ़ क्यों बढ़ रहा है? !! The Earth is heading towards Sunn??</td><td>2.04M</td></tr>
-                <tr><td>2</td><td>Agar Suraj Gayab Ho Gaya To? | What If Sun Disappears?</td><td>622K</td></tr>
-                <tr><td>3</td><td>Kaunsa Planet Baaki Planets Kay Sabse Nazdeek hai?</td><td>531K</td></tr>
-                <tr><td>4</td><td>Sabse Bhaari Planet Kaunsa Hai?</td><td>414K</td></tr>
-                <tr><td>5</td><td>Earth, हमें माफ़ कर देना! || SORRY, Earth :(</td><td>363K</td></tr>
-                <tr><td>6</td><td>क्या होगा अगर Jupiter गायब हो जाए? | What if Jupiter Disappears?</td><td>300K+</td></tr>
-                <tr><td>7</td><td>Earth गुम हो गया 🥹🥹 || Lost Earth - Part 1</td><td>162K</td></tr>
-                <tr><td>8</td><td>क्या Black Hole Earth को निगल सकता है?</td><td>150K+</td></tr>
-                <tr><td>9</td><td>Venus इतना गरम क्यों है? | Why is Venus so hot?</td><td>145K+</td></tr>
-                <tr><td>10</td><td>Suraj Tak Ka Mission 🚀 - Part 1</td><td>90K</td></tr>
-            </table>
-        </div>
-
-        <div id="content9" class="tab-content">
-            <h2>Top 10 Good Performing Shorts</h2>
-            <p><em>*Note: Based on historical channel data prior to the cessation of native Shorts production.</em></p>
-            <table>
-                <tr><th>Rank</th><th>Short Title / Topic</th><th>Status</th></tr>
-                <tr><td>1</td><td>Kya Fir Se Hogi Moon Ki Kranti ? 😨 #solarballs #india</td><td>Legacy</td></tr>
-                <tr><td>2</td><td>Pluto Planet Kyu Nahi Hai? #shorts</td><td>Legacy</td></tr>
-                <tr><td>3</td><td>Mars Par Paani Kahan Se Aaya? #animation</td><td>Legacy</td></tr>
-                <tr><td>4</td><td>Earth vs Mars: Kiska Din Bada Hai?</td><td>Legacy</td></tr>
-                <tr><td>5</td><td>Asteroid Se Kaise Bache Earth? 😱</td><td>Legacy</td></tr>
-                <tr><td>6</td><td>Sun Ka Asli Rang Kya Hai? ☀️</td><td>Legacy</td></tr>
-                <tr><td>7</td><td>Sabse Thanda Planet Konsa Hai? 🥶</td><td>Legacy</td></tr>
-                <tr><td>8</td><td>Moon Humse Door Kyu Jaa Raha Hai? 🌕</td><td>Legacy</td></tr>
-                <tr><td>9</td><td>Saturn Ke Rings Kaise Bane? 🪐</td><td>Legacy</td></tr>
-                <tr><td>10</td><td>Jupiter Earth Ko Kaise Bachata Hai? 🛡️</td><td>Legacy</td></tr>
-            </table>
-        </div>
-
+    <div class="header">
+        <h1>SolarBalls Hindi <span>[Algorithmic Audit & Restructure]</span></h1>
     </div>
-</div>
 
+    <div class="dashboard-grid">
+        <div class="sidebar">
+            <button class="tab-btn active" onclick="switchTab('tab-overview')">Data Overview</button>
+            <button class="tab-btn" onclick="switchTab('tab-long')">Long Videos (Flaws)</button>
+            <button class="tab-btn" onclick="switchTab('tab-shorts')">Shorts (Flaws)</button>
+            <button class="tab-btn" onclick="switchTab('tab-solutions')">Strategic Restructure</button>
+            <button class="tab-btn" onclick="switchTab('tab-top-long')">Top 10 Long</button>
+            <button class="tab-btn" onclick="switchTab('tab-top-shorts')">Top 10 Shorts</button>
+        </div>
+
+        <div class="content-area">
+            
+            <div id="tab-overview" class="tab-content active">
+                <h2>Channel Diagnostics (Last 90 Days)</h2>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Subscribers</div>
+                        <div class="kpi-value">875K+</div>
+                    </div>
+                    <div class="kpi-card alert">
+                        <div class="kpi-label">Active Audience Ratio</div>
+                        <div class="kpi-value">~5.7%</div>
+                    </div>
+                    <div class="kpi-card alert">
+                        <div class="kpi-label">Episodic Attrition Rate</div>
+                        <div class="kpi-value">-39.3%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="attritionChart"></canvas>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">*Chart depicts the mathematical drop-off in viewership when forcing users into multi-part arcs. The algorithm suppresses dependent content.</p>
+            </div>
+
+            <div id="tab-long" class="tab-content">
+                <h2>Problems Found - Long Videos</h2>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">1. The Episodic Death Spiral <span>+</span></div>
+                    <div class="accordion-content">
+                        <p>Forcing narratives into 3-part series kills CTR. "Suraj Tak Ka Mission" bled from 90K (Part 1) to 54K (Part 3). YouTube evaluates each video individually; a non-subscriber seeing "Part 3" on their homepage will not click. This fractures the audience and halts algorithmic velocity.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">2. Dead-Weight Subscriber Base <span>+</span></div>
+                    <div class="accordion-content">
+                        <p>Having 875K subscribers but pulling 45K views sends a catastrophic signal to the algorithm. When YouTube pushes a new upload to the core audience and 95% ignore it, the system immediately categorizes the video as low-quality and ceases broader distribution.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">3. Severe Metadata Inefficiency <span>+</span></div>
+                    <div class="accordion-content">
+                        <p>Mobile SEO character limits cut off titles at ~50 characters. Current titles waste this prime real estate on English text, duplicate phrasing, and structural tags (e.g., "Our Planets Gone Rogue Part 2 || Hindi..."). The translation is too literal and formal, failing to capture the click-intent of the grassroots Hindi demographic.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-shorts" class="tab-content">
+                <h2>Problems Found - Shorts Pipeline</h2>
+                
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">1. Zero Organic Funnel <span>+</span></div>
+                    <div class="accordion-content">
+                        <p>Shorts production has been abandoned. You have effectively severed the highest-converting top-of-funnel discovery mechanism on the platform. The only metrics generating right now are from legacy uploads.</p>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">2. Asset Mismanagement <span>+</span></div>
+                    <div class="accordion-content">
+                        <p>The channel produces high-quality, re-watchable 3D animation for long-form, but fails to extract the high-octane 30-second segments for vertical formats. This is a gross mismanagement of existing IP.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-solutions" class="tab-content">
+                <h2>Strategic Restructure Protocol</h2>
+
+                <h3>Long-Form Restructure</h3>
+                <ul>
+                    <li style="margin-bottom: 10px;"><strong>Terminate Episodic Framing:</strong> Consolidate episodes into single 15-20 minute features to boost AVD. If splits are mandatory, title them as completely independent events. Remove "Part 1/2" identifiers.</li>
+                    <li style="margin-bottom: 10px;"><strong>Aam Bolchal Metadata Optimization:</strong> Strip out English prefixes and formal translations. Exploit the first 50 characters with conversational Hindustani stakes. <em>(e.g., Instead of "Lost Earth Part 2", use "Earth ki nayi jagah kahan hai? 😱")</em></li>
+                    <li style="margin-bottom: 10px;"><strong>Hypothetical Pivot:</strong> Data proves standalone "What If" scenarios out-perform lore videos by 500%+. Reallocate 80% of production strictly to high-concept hypotheticals (e.g., "Agar Suraj Gayab Ho Gaya").</li>
+                </ul>
+
+                <h3>Shorts Funnel Activation</h3>
+                <ul>
+                    <li style="margin-bottom: 10px;"><strong>Mandatory Extraction Pipeline:</strong> Enforce a strict 1:3 ratio. Every long-form video must yield three 45-second, vertically re-framed vertical shorts.</li>
+                    <li style="margin-bottom: 10px;"><strong>Hard Cross-Linking:</strong> Utilize the YouTube Studio "Related Video" functionality on every Short to create a direct algorithmic bridge to the source long-form video.</li>
+                </ul>
+            </div>
+
+            <div id="tab-top-long" class="tab-content">
+                <h2>Top 10 Performing Long Videos</h2>
+                <div class="chart-container">
+                    <canvas id="topVideosChart"></canvas>
+                </div>
+                <table>
+                    <tr><th>Rank</th><th>Video Concept (Aam Bolchal Format)</th><th>Approx. Views</th></tr>
+                    <tr><td>1</td><td>Earth Sun ki taraf kyun badh raha hai?</td><td>2.04M</td></tr>
+                    <tr><td>2</td><td>Agar Suraj gayab ho gaya toh?</td><td>622K</td></tr>
+                    <tr><td>3</td><td>Kaunsa planet sabse nazdeek hai?</td><td>531K</td></tr>
+                    <tr><td>4</td><td>Sabse bhaari planet kaunsa hai?</td><td>414K</td></tr>
+                    <tr><td>5</td><td>Earth, humein maaf kar dena!</td><td>363K</td></tr>
+                </table>
+            </div>
+
+            <div id="tab-top-shorts" class="tab-content">
+                <h2>Top Performing Shorts (Legacy)</h2>
+                <p style="color: var(--accent-red); margin-bottom: 1rem;">Warning: Data reflects abandoned formats prior to the cessation of native Shorts production.</p>
+                <table>
+                    <tr><th>Rank</th><th>Short Topic</th><th>Status</th></tr>
+                    <tr><td>1</td><td>Kya fir se hogi Moon ki kranti?</td><td>Legacy Asset</td></tr>
+                    <tr><td>2</td><td>Pluto planet kyun nahi hai?</td><td>Legacy Asset</td></tr>
+                    <tr><td>3</td><td>Mars par paani kahan se aaya?</td><td>Legacy Asset</td></tr>
+                    <tr><td>4</td><td>Earth vs Mars: Kiska din bada hai?</td><td>Legacy Asset</td></tr>
+                    <tr><td>5</td><td>Asteroid se kaise bache Earth?</td><td>Legacy Asset</td></tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Tab Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Accordion Logic
+        function toggleAccordion(element) {
+            const parent = element.parentElement;
+            parent.classList.toggle('open');
+            const icon = element.querySelector('span');
+            icon.innerText = parent.classList.contains('open') ? '-' : '+';
+        }
+
+        // Initialize Charts (Chart.js)
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // Chart 1: Attrition Bleed (Line Chart)
+        const ctxAttrition = document.getElementById('attritionChart').getContext('2d');
+        new Chart(ctxAttrition, {
+            type: 'line',
+            data: {
+                labels: ['Part 1 (Mar 14)', 'Part 2 (Mar 21)', 'Part 3 (Mar 31)'],
+                datasets: [{
+                    label: 'Views (Suraj Tak Ka Mission)',
+                    data: [90200, 65300, 54700],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ef4444',
+                    pointRadius: 6,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#1e293b', titleColor: '#fff', padding: 10 }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#334155' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Chart 2: Top Videos Comparison (Bar Chart)
+        const ctxTop = document.getElementById('topVideosChart').getContext('2d');
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: ['Earth/Sun Collision', 'No Sun', 'Closest Planet', 'Heaviest Planet', 'Sorry Earth'],
+                datasets: [{
+                    label: 'Total Views',
+                    data: [2040000, 622000, 531000, 414000, 363000],
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#1e293b', callbacks: { label: function(context) { return (context.raw / 1000000).toFixed(2) + 'M Views'; } } }
+                },
+                scales: {
+                    y: { grid: { color: '#334155' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
